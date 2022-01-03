@@ -1,0 +1,72 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #044f48, #2a7561);
+        }
+        .register {
+            width: 300px;
+            height: 45px;
+            margin: auto;
+            border: none;
+            display: block;
+            cursor: pointer;
+        }
+        li {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <button class="register" onclick="register()">
+        Register
+    </button>
+    <ul id="list">
+
+    </ul>
+
+    <script>
+        var id = '';
+
+        function getUniqueId() {
+            var date = new Date();
+            var components = [
+                date.getYear(),
+                date.getMonth(),
+                date.getDate(),
+                date.getHours(),
+                date.getMinutes(),
+                date.getSeconds(),
+                date.getMilliseconds()
+            ];
+            return components.join("");
+        }
+
+        function register() {
+            id = getUniqueId();
+            var http = new XMLHttpRequest();
+            var url = 'http://localhost:8000/register/' + id;
+            http.open('POST', url, true);
+            http.setRequestHeader("Content-Type", "application/json; charset=utf8");
+            http.setRequestHeader("Access-Control-Allow-Origin", "*");
+            http.onreadystatechange = function() {
+                if (http.readyState == 4 && http.status == 200) {
+                    document.querySelector('.register').remove();
+                    const socket = new WebSocket('ws://127.0.0.1:8000/ws/' + id);
+                    socket.addEventListener('message', function (event) {
+                        const element = document.createElement('li');
+                        element.innerText = event.data;
+                        document.querySelector('#list').appendChild(element);
+                    });
+
+                }
+            }
+            http.send();
+        }
+    </script>
+</body>
+</html>
